@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "pi_bash_timeout",
+  "project_id": "2f6b97ac-fc70-4272-8a0a-ae0eb97640bc"
+}
