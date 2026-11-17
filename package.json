@@ -1,0 +1,10 @@
+{
+  "name": "pi-bash-timeout",
+  "version": "0.1.0",
+  "description": "A default timeout for pi's bash tool, so a command that never returns cannot hold a session forever.",
+  "license": "MIT",
+  "keywords": ["pi-package"],
+  "pi": { "extensions": ["./extensions"] },
+  "peerDependencies": { "@earendil-works/pi-coding-agent": "*" },
+  "scripts": { "test": "node --experimental-strip-types --no-warnings --test tests/*.test.ts" }
+}
