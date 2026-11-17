@@ -24,17 +24,12 @@ const api = "bash-timeout-test";
 
 type Step = { text: string } | { tool: string; arguments: Record<string, unknown> };
 
-const script: Step[] = (() => {
-	const path = process.env.BASH_TIMEOUT_TEST_SCRIPT;
-	if (!path) return [];
-	try {
-		return JSON.parse(readFileSync(path, "utf8")) as Step[];
-	} catch {
-		return [];
-	}
-})();
+/** The steps the script file holds; none when `BASH_TIMEOUT_TEST_SCRIPT` names no file. */
+const scriptPath = process.env.BASH_TIMEOUT_TEST_SCRIPT;
+const script: Step[] = scriptPath ? (JSON.parse(readFileSync(scriptPath, "utf8")) as Step[]) : [];
 
-let request = 0;
+/** How many model requests this process has answered: each one takes the next step. */
+let stepsServed = 0;
 
 const model = (id: string) => ({
 	id,
@@ -67,8 +62,8 @@ const message = (requested: Model<Api>, rest: Partial<AssistantMessage>): Assist
 
 export default function bashTimeoutTestProvider(pi: ExtensionAPI): void {
 	const streamSimple = (requested: Model<Api>, _context: unknown, _options?: SimpleStreamOptions) => {
-		const step = script[request] ?? { text: "done" };
-		request += 1;
+		const step = script[stepsServed] ?? { text: "done" };
+		stepsServed += 1;
 		const stream = createAssistantMessageEventStream();
 		queueMicrotask(() => {
 			if ("text" in step) {
@@ -82,7 +77,7 @@ export default function bashTimeoutTestProvider(pi: ExtensionAPI): void {
 			}
 			const toolCall = {
 				type: "toolCall" as const,
-				id: `call_${String(request)}`,
+				id: `call_${String(stepsServed)}`,
 				name: step.tool,
 				arguments: step.arguments,
 			};
